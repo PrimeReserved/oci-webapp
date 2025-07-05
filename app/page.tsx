@@ -1,14 +1,21 @@
+import DiscoverDeals from '@/components/Cards/DiscoverDeals';
+import ExploreProp from '@/components/Cards/ExploreProp';
+import HowItWorks from '@/components/Cards/HowItWorks';
+import OurMission from '@/components/Cards/OurMission';
+import DiscoverPropCard from '@/components/Cards/DiscoverPropCard';
+import HomepageHero from '@/components/Hero/HomepageHero';
+import WhatWeOffer from '@/components/Cards/WhatWeOffer';
+
 export default function Home() {
   return (
     <div>
-      <div className="min-h-screen w-full bg-gradient-to-br from-yellow-600 via-yellow-500 to-red-600 text-white flex items-center justify-center">
-        <div className="text-center px-4">
-          <h1 className="text-4xl font-bold mb-4">
-            🚧 Website Under Construction
-          </h1>
-          <p className="text-lg">Please check back soon!</p>
-        </div>
-      </div>
+      <HomepageHero />
+      <OurMission />
+      <ExploreProp />
+      <DiscoverDeals />
+      <HowItWorks />
+      <DiscoverPropCard />
+      <WhatWeOffer />
     </div>
   );
 }
