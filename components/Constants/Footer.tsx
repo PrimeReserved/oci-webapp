@@ -12,18 +12,18 @@ const Footer = () => {
           <div className="lg:col-span-5 sm:col-span-2">
             <Link href="/" className="inline-block mb-6">
               <Image
-                src="https://res.cloudinary.com/dzd51q99i/image/upload/v1749910278/oci/icons/ociLogo_efref5.png"
-                alt="OCI Homes and Properties"
+                src="https://res.cloudinary.com/dzd51q99i/image/upload/v1750354529/deployfaster/assets/Deployfaster.primereserved.com_logo_512_xwbzvj.png"
+                alt="Prime Estate Homes and Properties"
                 width={280}
                 height={140}
                 className="h-24 lg:h-28 w-auto"
               />
             </Link>
             <p className="text-black text-sm leading-relaxed mb-6 max-w-sm">
-              OCI is a trusted real estate company helping individuals and
-              families find, buy, and sell properties with ease. With a focus on
-              transparency, professionalism, and personalized service, we make
-              every real estate journey a smooth one.
+              Prime Estate is a trusted real estate company helping individuals
+              and families find, buy, and sell properties with ease. With a
+              focus on transparency, professionalism, and personalized service,
+              we make every real estate journey a smooth one.
             </p>
 
             {/* Social Media Icons */}
@@ -64,7 +64,7 @@ const Footer = () => {
               <ul className="space-y-3">
                 <li>
                   <Link
-                    href="/port-harcourt"
+                    href="/properties?state=Rivers"
                     className="text-black hover:text-primary transition-colors duration-200"
                   >
                     Port Harcourt
@@ -72,7 +72,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/lagos"
+                    href="/properties?state=Lagos"
                     className="text-black hover:text-primary transition-colors duration-200"
                   >
                     Lagos
@@ -80,7 +80,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/ibadan"
+                    href="/properties?state=Oyo"
                     className="text-black hover:text-primary transition-colors duration-200"
                   >
                     Ibadan
@@ -88,7 +88,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/delta"
+                    href="/properties?state=Delta"
                     className="text-black hover:text-primary transition-colors duration-200"
                   >
                     Delta
@@ -146,26 +146,26 @@ const Footer = () => {
               <div className="space-y-3">
                 <p className="text-black text-sm break-words">
                   <a
-                    href="mailto:info@ocihomesandproperties.com"
+                    href="mailto:info@primeestate.com"
                     className="hover:text-primary transition-colors duration-200"
                   >
-                    info@ocihomesandproperties.com
+                    info@primeestate.com
                   </a>
                 </p>
                 <p className="text-black text-sm">
                   <a
-                    href="tel:07034443777"
+                    href="tel:07000000000"
                     className="hover:text-primary transition-colors duration-200"
                   >
-                    07034443777
+                    07000000000
                   </a>
                 </p>
                 <p className="text-black text-sm">
                   <a
-                    href="tel:08033058782"
+                    href="tel:08000000000"
                     className="hover:text-primary transition-colors duration-200"
                   >
-                    08033058782
+                    08000000000
                   </a>
                 </p>
               </div>
@@ -178,13 +178,13 @@ const Footer = () => {
               <h3 className="text-black font-semibold mb-4">Our Address</h3>
               <div className="text-black text-sm space-y-2">
                 <p className="break-words">
-                  12 Ebele Okeke street, wuye Abuja, Nigeria.
+                  45 Ademola Adetokunbo Crescent, Wuse II Abuja, Nigeria.
                 </p>
                 <p className="break-words">
-                  378 Fola Osibo Street, Lekki phase 1 Lagos Nigeria.
+                  127 Admiralty Way, Lekki Phase 1 Lagos, Nigeria.
                 </p>
                 <p className="break-words">
-                  36 Trans Amadi Road Rumuobiakani Port Harcourt, Nigeria
+                  89 Aba Road, GRA Phase II Port Harcourt, Nigeria.
                 </p>
               </div>
             </div>
@@ -194,7 +194,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-center sm:justify-between items-center relative">
           <p className="text-black text-sm text-center mb-4 sm:mb-0 sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2">
-            Copyright © 2025 OCI
+            Copyright © 2025 Prime Estate
           </p>
 
           {/* Scroll to Top Button */}

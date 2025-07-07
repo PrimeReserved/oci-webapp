@@ -12,6 +12,7 @@ export interface Property {
   propertyType: 'sale' | 'rent';
   category: 'house' | 'apartment' | 'land' | 'commercial';
   images: string[];
+  video?: string; // Added video field
   features: string[];
   agent: {
     name: string;

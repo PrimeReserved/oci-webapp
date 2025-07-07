@@ -153,6 +153,16 @@ export const property = {
       validation: (rule: any) => rule.required().min(1),
     },
     {
+      name: 'video',
+      title: 'Property Video',
+      type: 'url',
+      description: 'YouTube, Vimeo, or any video URL to showcase the property',
+      validation: (rule: any) =>
+        rule.uri({
+          scheme: ['http', 'https'],
+        }),
+    },
+    {
       name: 'features',
       title: 'Property Features',
       type: 'array',

@@ -64,3 +64,15 @@ import SectionHeader from './SectionHeader';
 />
 
 -------------------- SectionHeader component -----------------------
+
+-------------------- PropertyGrid component -----------------------
+
+// In your component
+<PropertyGrid 
+  properties={properties} 
+  limit={3}
+  showViewAll={true}
+  onContactClick={handleContactClick}
+/>
+
+-------------------- PropertyGrid component -----------------------

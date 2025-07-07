@@ -35,15 +35,21 @@ const Header = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 lg:h-20">
+        <div
+          className={`flex justify-between items-center transition-all duration-300 ${
+            isScrolled ? 'h-12 lg:h-14' : 'h-16 lg:h-20'
+          }`}
+        >
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <Image
-              src="https://res.cloudinary.com/dzd51q99i/image/upload/v1749910278/oci/icons/ociLogo_efref5.png"
-              alt="OCI Homes and Properties"
+              src="https://res.cloudinary.com/dzd51q99i/image/upload/v1750354529/deployfaster/assets/Deployfaster.primereserved.com_logo_512_xwbzvj.png"
+              alt="Logo"
               width={120}
               height={60}
-              className="h-10 lg:h-12 w-auto"
+              className={`w-auto transition-all duration-300 ${
+                isScrolled ? 'h-8 lg:h-10' : 'h-10 lg:h-12'
+              }`}
             />
           </Link>
 

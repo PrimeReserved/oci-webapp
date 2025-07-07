@@ -1,16 +1,63 @@
-import React, { useState } from 'react';
-import { PropertyFilters } from '@/types/property';
+import React, { useState, useEffect } from 'react';
+import {
+  Search,
+  Filter,
+  X,
+  ChevronDown,
+  Home,
+  Settings,
+  PanelLeft,
+  SidebarOpen,
+  Layout,
+  PanelTop,
+} from 'lucide-react';
+
+// Define types
+interface PropertyFilters {
+  search?: string;
+  type?: 'sale' | 'rent';
+  category?: string;
+  location?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  priceMin?: number;
+  priceMax?: number;
+  areaMin?: number;
+  areaMax?: number;
+}
 
 interface PropertySearchProps {
   onFiltersChange: (filters: PropertyFilters) => void;
   totalProperties: number;
+  isSticky?: boolean;
+  position?: 'top' | 'left';
+  onPositionChange?: (position: 'top' | 'left') => void;
 }
 
 const PropertySearch: React.FC<PropertySearchProps> = ({
   onFiltersChange,
   totalProperties,
+  isSticky = false,
+  position = 'top',
+  onPositionChange,
 }) => {
   const [filters, setFilters] = useState<PropertyFilters>({});
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'sale' | 'rent'>('all');
+
+  // Slider states
+  const [priceRange, setPriceRange] = useState([0, 100000000]);
+  const [areaRange, setAreaRange] = useState([0, 1000]);
+
+  // Price formatting
+  const formatPrice = (price: number) => {
+    if (price >= 1000000) {
+      return `₦${(price / 1000000).toFixed(1)}M`;
+    } else if (price >= 1000) {
+      return `₦${(price / 1000).toFixed(0)}K`;
+    }
+    return `₦${price.toLocaleString()}`;
+  };
 
   const nigerianStates = [
     'Abia',
@@ -58,331 +105,472 @@ const PropertySearch: React.FC<PropertySearchProps> = ({
     onFiltersChange(newFilters);
   };
 
+  const handleTabChange = (tab: 'all' | 'sale' | 'rent') => {
+    setActiveTab(tab);
+    const typeFilter = tab === 'all' ? undefined : tab;
+    handleFilterChange('type', typeFilter);
+  };
+
+  const handlePriceChange = (values: number[]) => {
+    setPriceRange(values);
+    handleFilterChange('priceMin', values[0] > 0 ? values[0] : undefined);
+    handleFilterChange(
+      'priceMax',
+      values[1] < 100000000 ? values[1] : undefined
+    );
+  };
+
+  const handleAreaChange = (values: number[]) => {
+    setAreaRange(values);
+    handleFilterChange('areaMin', values[0] > 0 ? values[0] : undefined);
+    handleFilterChange('areaMax', values[1] < 1000 ? values[1] : undefined);
+  };
+
   const clearFilters = () => {
     setFilters({});
     onFiltersChange({});
+    setActiveTab('all');
+    setPriceRange([0, 100000000]);
+    setAreaRange([0, 1000]);
   };
 
   const hasActiveFilters = Object.keys(filters).some(
-    (key) => filters[key as keyof PropertyFilters]
+    (key) => filters[key as keyof PropertyFilters] && key !== 'search'
   );
 
-  return (
-    <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-8">
-      {/* Filters */}
-      <div className="p-8">
-        {/* Primary Filters Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Property Type */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Property Type
-            </label>
-            <div className="relative">
-              <select
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer"
-                value={filters.type || ''}
-                onChange={(e) =>
-                  handleFilterChange('type', e.target.value || undefined)
-                }
+  // Custom Range Slider Component
+  const RangeSlider = ({
+    min,
+    max,
+    values,
+    onChange,
+    formatValue,
+    label,
+  }: {
+    min: number;
+    max: number;
+    values: number[];
+    onChange: (values: number[]) => void;
+    formatValue: (value: number) => string;
+    label: string;
+  }) => {
+    const [localValues, setLocalValues] = useState(values);
+
+    useEffect(() => {
+      setLocalValues(values);
+    }, [values]);
+
+    const handleChange = (index: number, value: number) => {
+      const newValues = [...localValues];
+      newValues[index] = value;
+
+      // Ensure min doesn't exceed max and vice versa
+      if (index === 0 && value > localValues[1]) {
+        newValues[1] = value;
+      }
+      if (index === 1 && value < localValues[0]) {
+        newValues[0] = value;
+      }
+
+      setLocalValues(newValues);
+      onChange(newValues);
+    };
+
+    const getPercentage = (value: number) =>
+      ((value - min) / (max - min)) * 100;
+
+    return (
+      <div className="space-y-2">
+        <label className="block text-xs font-medium text-gray-600">
+          {label}
+        </label>
+        <div className="relative pt-2">
+          <div className="relative h-2 bg-gray-200 rounded-full">
+            <div
+              className="absolute h-2 bg-red-500 rounded-full"
+              style={{
+                left: `${getPercentage(localValues[0])}%`,
+                width: `${getPercentage(localValues[1]) - getPercentage(localValues[0])}%`,
+              }}
+            />
+            <input
+              type="range"
+              min={min}
+              max={max}
+              value={localValues[0]}
+              onChange={(e) => handleChange(0, Number(e.target.value))}
+              className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer range-slider"
+              style={{ zIndex: 1 }}
+            />
+            <input
+              type="range"
+              min={min}
+              max={max}
+              value={localValues[1]}
+              onChange={(e) => handleChange(1, Number(e.target.value))}
+              className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer range-slider"
+              style={{ zIndex: 2 }}
+            />
+          </div>
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>{formatValue(localValues[0])}</span>
+            <span>{formatValue(localValues[1])}</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const AdvancedFiltersContent = () => (
+    <div className="space-y-4">
+      <div
+        className={`grid gap-4 ${position === 'left' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}
+      >
+        {/* Location */}
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-2">
+            Location (State)
+          </label>
+          <select
+            className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            value={filters.location || ''}
+            onChange={(e) =>
+              handleFilterChange('location', e.target.value || undefined)
+            }
+          >
+            <option value="">All States</option>
+            {nigerianStates.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-2">
+            Category
+          </label>
+          <select
+            className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            value={filters.category || ''}
+            onChange={(e) =>
+              handleFilterChange('category', e.target.value || undefined)
+            }
+          >
+            <option value="">All Categories</option>
+            <option value="house">House</option>
+            <option value="apartment">Apartment</option>
+            <option value="land">Land</option>
+            <option value="commercial">Commercial</option>
+          </select>
+        </div>
+
+        {/* Bedrooms */}
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-2">
+            Bedrooms
+          </label>
+          <select
+            className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            value={filters.bedrooms || ''}
+            onChange={(e) =>
+              handleFilterChange(
+                'bedrooms',
+                e.target.value ? Number(e.target.value) : undefined
+              )
+            }
+          >
+            <option value="">Any</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+            <option value="5">5+</option>
+          </select>
+        </div>
+
+        {/* Bathrooms */}
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-2">
+            Bathrooms
+          </label>
+          <select
+            className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            value={filters.bathrooms || ''}
+            onChange={(e) =>
+              handleFilterChange(
+                'bathrooms',
+                e.target.value ? Number(e.target.value) : undefined
+              )
+            }
+          >
+            <option value="">Any</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+            <option value="5">5+</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Price Range Slider */}
+      <div
+        className={`grid gap-4 ${position === 'left' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
+      >
+        <RangeSlider
+          min={0}
+          max={100000000}
+          values={priceRange}
+          onChange={handlePriceChange}
+          formatValue={formatPrice}
+          label="Price Range"
+        />
+
+        {/* Area Range Slider */}
+        <RangeSlider
+          min={0}
+          max={1000}
+          values={areaRange}
+          onChange={handleAreaChange}
+          formatValue={(value) => `${value} sqm`}
+          label="Area Range"
+        />
+      </div>
+    </div>
+  );
+
+  if (position === 'left') {
+    return (
+      <div
+        className={`bg-white shadow-lg border border-gray-200 rounded-lg h-fit ${isSticky ? 'sticky top-20' : ''}`}
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Search Filters
+            </h3>
+            {onPositionChange && (
+              <button
+                onClick={() => onPositionChange('top')}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Switch to top position"
               >
-                <option value="">All Types</option>
-                <option value="sale">For Sale</option>
-                <option value="rent">For Rent</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
+                <PanelTop className="w-4 h-4 text-gray-500" />
+              </button>
+            )}
           </div>
 
-          {/* Location */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Location (State)
-            </label>
-            <div className="relative">
-              <select
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer"
-                value={filters.location || ''}
-                onChange={(e) =>
-                  handleFilterChange('location', e.target.value || undefined)
-                }
-              >
-                <option value="">All States</option>
-                {nigerianStates.map((state) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
+          {/* Search Bar */}
+          <div className="relative mb-4">
+            <input
+              type="text"
+              placeholder="Search properties..."
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              value={filters.search || ''}
+              onChange={(e) =>
+                handleFilterChange('search', e.target.value || undefined)
+              }
+            />
+            <Search className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
           </div>
 
-          {/* Category */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Category
-            </label>
-            <div className="relative">
-              <select
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer"
-                value={filters.category || ''}
-                onChange={(e) =>
-                  handleFilterChange('category', e.target.value || undefined)
+          {/* Property Type Tabs */}
+          <div className="flex space-x-1 mb-4">
+            {[
+              { key: 'all', label: 'All' },
+              { key: 'sale', label: 'Sale' },
+              { key: 'rent', label: 'Rent' },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() =>
+                  handleTabChange(tab.key as 'all' | 'sale' | 'rent')
                 }
+                className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-colors ${
+                  activeTab === tab.key
+                    ? 'bg-red-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
               >
-                <option value="">All Categories</option>
-                <option value="house">House</option>
-                <option value="apartment">Apartment</option>
-                <option value="land">Land</option>
-                <option value="commercial">Commercial</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
+                {tab.label}
+              </button>
+            ))}
           </div>
 
-          {/* Bedrooms */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Bedrooms
-            </label>
-            <div className="relative">
-              <select
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer"
-                value={filters.bedrooms || ''}
-                onChange={(e) =>
-                  handleFilterChange(
-                    'bedrooms',
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
-                }
-              >
-                <option value="">Any</option>
-                <option value="1">1+</option>
-                <option value="2">2+</option>
-                <option value="3">3+</option>
-                <option value="4">4+</option>
-                <option value="5">5+</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
+          {/* Results Count */}
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Home className="w-4 h-4 text-red-500" />
+            <span className="font-medium">
+              {totalProperties.toLocaleString()} Properties
+            </span>
+            {hasActiveFilters && (
+              <span className="text-gray-500">filtered</span>
+            )}
           </div>
         </div>
 
-        {/* Secondary Filters Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Price Range */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Price Range (₦)
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="relative">
-                <input
-                  type="number"
-                  placeholder="Min Price"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                  value={filters.priceMin || ''}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      'priceMin',
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                />
-              </div>
-              <div className="relative">
-                <input
-                  type="number"
-                  placeholder="Max Price"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                  value={filters.priceMax || ''}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      'priceMax',
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </div>
+        {/* Filters */}
+        <div className="p-4">
+          <AdvancedFiltersContent />
 
-          {/* Area Range */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Area (sqm)
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="number"
-                placeholder="Min Area"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                value={filters.areaMin || ''}
-                onChange={(e) =>
-                  handleFilterChange(
-                    'areaMin',
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
-                }
-              />
-              <input
-                type="number"
-                placeholder="Max Area"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                value={filters.areaMax || ''}
-                onChange={(e) =>
-                  handleFilterChange(
-                    'areaMax',
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
-                }
-              />
-            </div>
-          </div>
-
-          {/* Search */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Search by Location, Features, or Keywords
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search by city, features (e.g., swimming pool, gym), property type..."
-                className="w-full px-4 py-3 pl-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                value={filters.search || ''}
-                onChange={(e) =>
-                  handleFilterChange('search', e.target.value || undefined)
-                }
-              />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg
-                  className="w-5 h-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
-              <svg
-                className="w-4 h-4 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-lg font-bold text-gray-900">
-                {totalProperties.toLocaleString()}{' '}
-                {totalProperties === 1 ? 'Property' : 'Properties'}
-              </p>
-              <p className="text-sm text-gray-500">
-                {hasActiveFilters ? 'matching your criteria' : 'available'}
-              </p>
-            </div>
-          </div>
-
+          {/* Clear Filters */}
           {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all duration-200 flex items-center space-x-2"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <button
+                onClick={clearFilters}
+                className="w-full px-4 py-2 bg-gray-100 hover:bg-red-50 text-red-600 text-sm font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-              <span>Clear Filters</span>
-            </button>
+                <X className="w-4 h-4" />
+                <span>Clear All Filters</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
+    );
+  }
+
+  // Original top position layout
+  return (
+    <div
+      className={`bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden mb-4 ${isSticky ? 'transition-all duration-300' : ''}`}
+    >
+      {/* Main Search Row */}
+      <div className={`border-b border-gray-200 ${isSticky ? 'p-2' : 'p-3'}`}>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          {/* Search Bar */}
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search by location, features, or keywords..."
+              className={`w-full pl-8 pr-3 bg-gray-50 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-transparent transition-all duration-200 ${isSticky ? 'py-1.5 text-xs' : 'py-2 text-sm'}`}
+              value={filters.search || ''}
+              onChange={(e) =>
+                handleFilterChange('search', e.target.value || undefined)
+              }
+            />
+            <Search
+              className={`absolute left-2.5 text-gray-400 ${isSticky ? 'top-2 w-3 h-3' : 'top-2.5 w-3.5 h-3.5'}`}
+            />
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center space-x-2">
+            {/* Layout Toggle */}
+            {onPositionChange && (
+              <button
+                onClick={() => onPositionChange('left')}
+                className={`hidden lg:flex items-center space-x-1 px-3 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors duration-200 ${isSticky ? 'py-1.5' : 'py-2'}`}
+                title="Switch to left sidebar"
+              >
+                <PanelLeft className="w-4 h-4 text-gray-500" />
+              </button>
+            )}
+
+            {/* Filter Toggle */}
+            <button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className={`flex items-center space-x-1 px-3 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors duration-200 whitespace-nowrap ${isSticky ? 'py-1.5' : 'py-2'}`}
+            >
+              <Filter className="w-3 h-3 text-gray-500" />
+              <span className="text-xs text-gray-700">
+                {showAdvancedFilters
+                  ? 'Hide Advanced Filters'
+                  : 'Show Advanced Filters'}
+              </span>
+              <ChevronDown
+                className={`w-3 h-3 text-gray-500 transition-transform duration-200 ${showAdvancedFilters ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className={`px-3 bg-gray-100 hover:bg-red-50 text-red-600 text-xs font-medium rounded transition-colors duration-200 flex items-center space-x-1 ${isSticky ? 'py-1.5' : 'py-2'}`}
+              >
+                <X className="w-3 h-3" />
+                <span>Clear</span>
+              </button>
+            )}
+          </div>
+
+          {/* Property Type Tabs */}
+          <div className="flex space-x-1">
+            {[
+              { key: 'all', label: 'All Properties' },
+              { key: 'sale', label: 'For Sale' },
+              { key: 'rent', label: 'For Rent' },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() =>
+                  handleTabChange(tab.key as 'all' | 'sale' | 'rent')
+                }
+                className={`px-3 text-xs font-medium rounded transition-colors duration-200 whitespace-nowrap ${isSticky ? 'py-1.5' : 'py-2'} ${
+                  activeTab === tab.key
+                    ? 'text-red-600 border-b-2 border-red-600 bg-red-50'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Results Count */}
+      <div
+        className={`bg-gray-50 border-b border-gray-200 ${isSticky ? 'px-2 py-1.5' : 'px-3 py-2'}`}
+      >
+        <div className="flex items-center space-x-2">
+          <Home className="w-3 h-3 text-red-500" />
+          <span
+            className={`font-semibold text-gray-900 ${isSticky ? 'text-xs' : 'text-sm'}`}
+          >
+            {totalProperties.toLocaleString()} Properties
+          </span>
+          {hasActiveFilters && (
+            <span className="text-xs text-gray-500">filtered</span>
+          )}
+        </div>
+      </div>
+
+      {/* Advanced Filters */}
+      {showAdvancedFilters && (
+        <div
+          className={`border-b border-gray-200 bg-gray-50 ${isSticky ? 'p-2' : 'p-3'} max-h-96 overflow-y-auto md:max-h-none md:overflow-visible`}
+        >
+          <AdvancedFiltersContent />
+        </div>
+      )}
+
+      <style jsx>{`
+        .range-slider::-webkit-slider-thumb {
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          background: #dc2626;
+          border: 2px solid white;
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .range-slider::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          background: #dc2626;
+          border: 2px solid white;
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+      `}</style>
     </div>
   );
 };
