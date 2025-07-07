@@ -16,10 +16,11 @@ import { formatDate, readingTime } from '@/lib/utils';
 import BlogCard from '@/components/Blog/BlogCard';
 import ShareButtons from '@/components/Blog/ShareButtons';
 
+// Updated interface for Next.js 15
 interface BlogDetailPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Helper function to get image URL from URL-based image objects
@@ -110,8 +111,11 @@ const components = {
 export async function generateMetadata({
   params,
 }: BlogDetailPageProps): Promise<Metadata> {
+  // Await the params
+  const { slug } = await params;
+
   const post: BlogPost = await client.fetch(getBlogPostBySlugQuery, {
-    slug: params.slug,
+    slug: slug,
   });
 
   if (!post) {
@@ -143,8 +147,11 @@ export async function generateMetadata({
 }
 
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
+  // Await the params
+  const { slug } = await params;
+
   const post: BlogPost = await client.fetch(getBlogPostBySlugQuery, {
-    slug: params.slug,
+    slug: slug,
   });
 
   if (!post) {
@@ -156,7 +163,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
     getRelatedBlogPostsQuery,
     {
       category: post.category,
-      slug: params.slug,
+      slug: slug,
     }
   );
 
@@ -231,7 +238,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           {/* Share Buttons */}
           <div className="flex items-center space-x-4 pb-6">
             <span className="text-sm font-medium text-gray-700">Share:</span>
-            <ShareButtons url={`/blog/${params.slug}`} title={post.title} />
+            <ShareButtons url={`/blog/${slug}`} title={post.title} />
           </div>
         </div>
       </div>
