@@ -1,28 +1,34 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import Header from '@/components/Constants/Header';
+import Footer from '@/components/Constants/Footer';
+import ScrollAnimations from '@/components/Animations/ScrollAnimations';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'OCI Homes & Properties - Premium Real Estate in Nigeria',
-    template: '%s | OCI Homes & Properties',
+    default: 'Premium Real Estate Properties - Buy, Sell, Rent',
+    template: '%s | Premium Real Estate',
   },
   description:
-    'OCI Homes & Properties offers premium real estate in Lagos, Abuja, and Port Harcourt. Buy now, pay later options available. Corporate and residential properties.',
+    'Discover premium real estate properties in Nigeria. Buy, sell, and rent residential and commercial properties. Flexible payment options available.',
   keywords: [
     'real estate Nigeria',
-    'Lagos properties',
-    'Abuja real estate',
-    'Port Harcourt properties',
-    'buy now pay later',
-    'OCI Homes',
-    'Nigerian property investment',
+    'properties for sale',
+    'houses for rent',
+    'commercial real estate',
+    'residential properties',
+    'property investment',
+    'real estate agency',
+    'buy property Nigeria',
+    'rent apartment',
+    'land for sale',
   ],
-  authors: [{ name: 'OCI Group' }],
-  creator: 'OCI Homes & Properties',
-  publisher: 'OCI Group',
+  authors: [{ name: 'Premium Real Estate' }],
+  creator: 'Premium Real Estate Properties',
+  publisher: 'Premium Real Estate Group',
   robots: {
     index: true,
     follow: true,
@@ -37,17 +43,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_NG',
-    url: 'https://ocihomes.com',
-    siteName: 'OCI Homes & Properties',
-    title: 'OCI Homes & Properties - Premium Real Estate in Nigeria',
+    url: 'https://yourrealestate.com',
+    siteName: 'Premium Real Estate Properties',
+    title: 'Premium Real Estate Properties - Buy, Sell, Rent',
     description:
-      'Premium real estate in Lagos, Abuja, and Port Harcourt. Buy now, pay later options available.',
+      'Discover premium real estate properties in Nigeria. Buy, sell, and rent with flexible payment options.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'OCI Homes & Properties - Premium Real Estate in Nigeria',
+    title: 'Premium Real Estate Properties - Buy, Sell, Rent',
     description:
-      'Premium real estate in Lagos, Abuja, and Port Harcourt. Buy now, pay later options available.',
+      'Discover premium real estate properties in Nigeria. Buy, sell, and rent with flexible payment options.',
   },
   verification: {
     // Add when you have these
@@ -63,8 +69,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-NG">
-      <body className={inter.className}>
-        <main>{children}</main>
+      <body className={inter.className} suppressHydrationWarning={true}>
+        <ScrollAnimations />
+        <Header />
+        <main className="pt-16 lg:pt-20 animate-in fade-in duration-500">
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   );
