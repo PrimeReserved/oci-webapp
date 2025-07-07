@@ -8,10 +8,11 @@ import { client } from '@/lib/sanity';
 import { getBlogPostsQuery } from '@/lib/sanity/queries/blog';
 import { BlogPost } from '@/types/blog';
 
+// Updated interface for Next.js 15
 interface BlogPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
-  };
+  }>;
 }
 
 export const metadata: Metadata = {
@@ -29,7 +30,9 @@ export const metadata: Metadata = {
 const POSTS_PER_PAGE = 9;
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
-  const currentPage = Number(searchParams.page) || 1;
+  // Await the searchParams
+  const resolvedSearchParams = await searchParams;
+  const currentPage = Number(resolvedSearchParams.page) || 1;
 
   try {
     const { posts, total } = await client.fetch(
