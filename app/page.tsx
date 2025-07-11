@@ -8,7 +8,7 @@ import WhatWeOffer from '@/components/Cards/WhatWeOffer';
 
 export default function Home() {
   return (
-    <div>
+    <div className="w-full min-h-screen overflow-x-hidden">
       <HomepageHero />
       <OurMission />
       <ExploreProp />

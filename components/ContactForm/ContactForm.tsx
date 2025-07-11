@@ -50,21 +50,21 @@ const ContactForm = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="pt-8 pb-4 px-8">
+      <div className="pt-8 pb-4 px-2">
         <div className="text-sm text-gray-600 mb-4">Get Started</div>
 
         <div className="max-w-4xl">
-          <h1 className="text-3xl lg:text-6xl font-bold text-black mb-2 ">
+          <h1 className="text-2xl lg:text-6xl font-bold text-black mb-2 ">
             Get in touch with us.
           </h1>
-          <h2 className="text-3xl lg:text-6xl font-bold text-black mb-4 ">
+          <h2 className="text-2xl lg:text-6xl font-bold text-black mb-4 ">
             We're here to assist you.
           </h2>
         </div>
       </div>
 
       {/* Content */}
-      <div className="px-8 max-w-full">
+      <div className="px-4 max-w-full">
         {/* Leave us a Message Button */}
         <div className="mb-16">
           <button className="bg-red-600 text-white px-8 py-4 rounded-full font-medium text-lg hover:bg-red-700 transition-colors">

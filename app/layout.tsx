@@ -159,6 +159,9 @@ export default function RootLayout({
   return (
     <html lang="en-NG">
       <head>
+        {/* CRITICAL: Mobile viewport meta tag - THIS IS THE FIX */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
         {/* Additional SEO Meta Tags */}
         <meta name="theme-color" content="#1f2937" />
         <meta name="msapplication-TileColor" content="#1f2937" />

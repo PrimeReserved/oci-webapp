@@ -16,7 +16,7 @@ const page = () => {
           borderRadius="rounded-xl"
         />
       </div>
-      <div className="px-8">
+      <div>
         <ContactForm />
       </div>
     </main>
