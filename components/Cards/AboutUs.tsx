@@ -49,8 +49,8 @@ const AboutUs: React.FC<AboutUsProps> = ({ className = '' }) => {
               </h2>
 
               <p className="text-medium text-xs sm:text-sm lg:text-base leading-relaxed mb-4 sm:mb-6">
-                At OCI, we make finding your perfect home simple, transparent,
-                and rewarding. With local expertise and a passion for connecting
+                We make finding your perfect home simple, transparent, and
+                rewarding. With local expertise and a passion for connecting
                 people to the right property, we guide you every step of the
                 way.
               </p>

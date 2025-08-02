@@ -49,7 +49,7 @@ const WhatWeOffer: React.FC = () => {
 
             <div className="space-y-2">
               <p className="text-lg text-medium leading-relaxed">
-                OCI Homes specializes in:
+                We specialize in:
               </p>
 
               <div className="space-y-2">
